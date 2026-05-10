@@ -1,38 +1,44 @@
 import { defineStore } from 'pinia';
 import { ref, reactive, shallowRef } from 'vue';
-import type { MetricData, LogEntry, HealthNode, ChartPoint } from '../types';
+import type { MetricData, LogEntry, HealthNode, ChartPoint, StreamStatus, TimeRange } from '../types';
+import { streamService } from '../services/StreamService';
 
 export const useStreamingStore = defineStore('streaming', () => {
-  const isStreaming = ref(true);
+  const status = ref<StreamStatus>('connected');
   
   const metrics = reactive<Record<string, MetricData>>({
-    'BTC': { symbol: 'BTC', name: 'Bitcoin', value: 64231.50, change: 2.4, trend: 'up', history: Array(10).fill(64000).map(v => v + Math.random() * 500) },
-    'ETH': { symbol: 'ETH', name: 'Ethereum', value: 3450.12, change: -0.5, trend: 'down', history: Array(10).fill(3400).map(v => v + Math.random() * 100) },
-    'VOL': { symbol: 'VOL', name: 'Volume 24H', value: 1200000000, change: 12, trend: 'up', history: Array(10).fill(1).map(() => Math.random()) },
-    'TPS': { symbol: 'TPS', name: 'System TPS', value: 4250, change: 0, trend: 'stable', history: Array(10).fill(4000).map(v => v + Math.random() * 500) }
+    'BTC': { symbol: 'BTC', name: 'Bitcoin', value: 64231.50, change: 2.4, trend: 'up', history: [] },
+    'ETH': { symbol: 'ETH', name: 'Ethereum', value: 3450.12, change: -0.5, trend: 'down', history: [] },
+    'VOL': { symbol: 'VOL', name: 'Volume 24H', value: 1200000, change: 12, trend: 'up', history: [] },
+    'TPS': { symbol: 'TPS', name: 'System TPS', value: 4250, change: 0, trend: 'stable', history: [] }
   });
 
-  const logs = ref<LogEntry[]>([
-    { id: '1', timestamp: '14:23:01', level: 'INFO', message: 'Terminal initialized' },
-    { id: '2', timestamp: '14:23:05', level: 'INFO', message: 'WebSocket connected' }
-  ]);
-
+  const logs = ref<LogEntry[]>([]);
+  // Use shallowRef for high-frequency time-series to optimize performance
   const marketData = shallowRef<ChartPoint[]>([]);
   const healthNodes = ref<HealthNode[]>(
     Array.from({ length: 60 }, (_, i) => ({
       id: i,
-      status: Math.random() > 0.8 ? (Math.random() > 0.5 ? 'error' : 'warning') : 'active'
+      status: 'active'
     }))
   );
 
-  function updateMetric(symbol: string, data: Partial<MetricData>) {
+  function updateMetric(symbol: string, value: number, change: number) {
     if (metrics[symbol]) {
-      Object.assign(metrics[symbol], data);
-      if (data.value !== undefined) {
-        metrics[symbol].history.push(data.value);
-        if (metrics[symbol].history.length > 20) metrics[symbol].history.shift();
-      }
+      metrics[symbol].value = value;
+      metrics[symbol].change = change;
+      metrics[symbol].trend = change > 0 ? 'up' : change < 0 ? 'down' : 'stable';
+      
+      metrics[symbol].history.push(value);
+      if (metrics[symbol].history.length > 30) metrics[symbol].history.shift();
     }
+  }
+
+  function addMarketPoint(point: ChartPoint) {
+    const newData = [...marketData.value, point];
+    // Keep last 100 points for live view
+    if (newData.length > 100) newData.shift();
+    marketData.value = newData;
   }
 
   function addLog(log: LogEntry) {
@@ -40,33 +46,29 @@ export const useStreamingStore = defineStore('streaming', () => {
     if (logs.value.length > 50) logs.value.pop();
   }
 
-  function addMarketPoint(point: ChartPoint) {
-    const newData = [...marketData.value, point];
-    if (newData.length > 100) newData.shift();
-    marketData.value = newData;
-  }
-
-  function toggleStreaming() {
-    isStreaming.value = !isStreaming.value;
+  function setStatus(newStatus: StreamStatus) {
+    status.value = newStatus;
+    if (newStatus === 'paused') streamService.pause();
+    else if (newStatus === 'connected') streamService.resume();
   }
 
   return {
-    isStreaming,
+    status,
     metrics,
     logs,
     marketData,
     healthNodes,
     updateMetric,
-    addLog,
     addMarketPoint,
-    toggleStreaming
+    addLog,
+    setStatus
   };
 });
 
 export const useUIStore = defineStore('ui', () => {
   const activeTab = ref('overview');
   const isSidebarOpen = ref(true);
-  const isSearchFocused = ref(false);
+  const timeRange = ref<TimeRange>('live');
   const isDark = ref(localStorage.getItem('theme') !== 'light');
 
   function toggleTheme() {
@@ -76,17 +78,14 @@ export const useUIStore = defineStore('ui', () => {
   }
 
   function updateDocumentTheme() {
-    if (isDark.value) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    if (isDark.value) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
   }
 
   return {
     activeTab,
     isSidebarOpen,
-    isSearchFocused,
+    timeRange,
     isDark,
     toggleTheme,
     updateDocumentTheme
