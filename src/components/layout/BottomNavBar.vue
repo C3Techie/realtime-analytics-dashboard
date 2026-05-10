@@ -4,11 +4,12 @@ import { useUIStore } from '../../store';
 const uiStore = useUIStore();
 
 const tabs = [
-  { id: 'overview', icon: 'dashboard', label: 'Overview' },
-  { id: 'markets', icon: 'monitoring', label: 'Markets' },
-  { id: 'analytics', icon: 'query_stats', label: 'Analytics' },
-  { id: 'health', icon: 'memory', label: 'Health' }
+  { id: 'overview', icon: 'dashboard', label: 'Overview' }
 ];
+
+const handleTabClick = (tabId: string) => {
+  uiStore.activeTab = tabId;
+};
 </script>
 
 <template>
@@ -16,7 +17,7 @@ const tabs = [
     <button 
       v-for="tab in tabs" 
       :key="tab.id"
-      @click="uiStore.activeTab = tab.id"
+      @click="handleTabClick(tab.id)"
       class="flex flex-col items-center gap-1 p-2 transition-colors duration-200"
       :class="uiStore.activeTab === tab.id ? 'text-primary' : 'text-on-surface-variant'"
     >

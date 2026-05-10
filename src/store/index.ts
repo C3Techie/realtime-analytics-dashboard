@@ -5,7 +5,7 @@ import { streamService } from '../services/StreamService';
 
 export const useStreamingStore = defineStore('streaming', () => {
   const status = ref<StreamStatus>('connected');
-  
+
   const metrics = reactive<Record<string, MetricData>>({
     'BTC': { symbol: 'BTC', name: 'Bitcoin', value: 64231.50, change: 2.4, trend: 'up', history: [] },
     'ETH': { symbol: 'ETH', name: 'Ethereum', value: 3450.12, change: -0.5, trend: 'down', history: [] },
@@ -28,7 +28,7 @@ export const useStreamingStore = defineStore('streaming', () => {
       metrics[symbol].value = value;
       metrics[symbol].change = change;
       metrics[symbol].trend = change > 0 ? 'up' : change < 0 ? 'down' : 'stable';
-      
+
       metrics[symbol].history.push(value);
       if (metrics[symbol].history.length > 30) metrics[symbol].history.shift();
     }
@@ -70,6 +70,16 @@ export const useUIStore = defineStore('ui', () => {
   const isSidebarOpen = ref(true);
   const timeRange = ref<TimeRange>('live');
   const isDark = ref(localStorage.getItem('theme') !== 'light');
+  
+  const toasts = ref<{ id: number; message: string; type: 'info' | 'success' | 'warning' | 'error' }[]>([]);
+
+  function addToast(message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') {
+    const id = Date.now();
+    toasts.value.push({ id, message, type });
+    setTimeout(() => {
+      toasts.value = toasts.value.filter(t => t.id !== id);
+    }, 3000);
+  }
 
   function toggleTheme() {
     isDark.value = !isDark.value;
@@ -87,6 +97,8 @@ export const useUIStore = defineStore('ui', () => {
     isSidebarOpen,
     timeRange,
     isDark,
+    toasts,
+    addToast,
     toggleTheme,
     updateDocumentTheme
   };

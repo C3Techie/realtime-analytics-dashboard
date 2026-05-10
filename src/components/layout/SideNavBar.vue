@@ -6,11 +6,7 @@ const uiStore = useUIStore();
 const { isDesktop } = useBreakpoint();
 
 const navItems = [
-  { id: 'overview', icon: 'dashboard', label: 'Overview' },
-  { id: 'markets', icon: 'monitoring', label: 'Markets' },
-  { id: 'analytics', icon: 'query_stats', label: 'Analytics' },
-  { id: 'alerts', icon: 'notification_important', label: 'Alerts' },
-  { id: 'health', icon: 'memory', label: 'Health' }
+  { id: 'overview', icon: 'dashboard', label: 'Overview' }
 ];
 </script>
 

@@ -5,6 +5,10 @@ import { useUIStore, useStreamingStore } from '../../store';
 const { isMobile } = useBreakpoint();
 const uiStore = useUIStore();
 const streamingStore = useStreamingStore();
+
+const handleNotImplemented = (moduleName: string) => {
+  uiStore.addToast(`Access Denied: ${moduleName} is restricted at your current clearance level.`, 'error');
+};
 </script>
 
 <template>
@@ -52,14 +56,14 @@ const streamingStore = useStreamingStore();
         <span class="material-symbols-outlined">{{ uiStore.isDark ? 'light_mode' : 'dark_mode' }}</span>
       </button>
 
-      <button class="p-2 text-on-surface-variant hover:bg-white/5 transition-colors rounded-default">
+      <button @click="handleNotImplemented('Sensors')" class="p-2 text-on-surface-variant hover:bg-white/5 transition-colors rounded-default">
         <span class="material-symbols-outlined">sensors</span>
       </button>
-      <button class="p-2 text-on-surface-variant hover:bg-white/5 transition-colors rounded-default relative">
+      <button @click="handleNotImplemented('Notifications')" class="p-2 text-on-surface-variant hover:bg-white/5 transition-colors rounded-default relative">
         <span class="material-symbols-outlined">notifications</span>
         <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
       </button>
-      <div class="ml-2 pl-4 border-l border-white/10 hidden md:block">
+      <div @click="handleNotImplemented('Profile Settings')" class="ml-2 pl-4 border-l border-white/10 hidden md:block cursor-pointer hover:opacity-80 transition-opacity">
         <img alt="Profile" class="w-8 h-8 rounded-default border border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwbNsUtQOAfv2h23MqjCcGMGxY_fKBBbB__zt4oF8XfGqD560f9d7OW6xv0-ws2P3nMnRiifB6MKzzZjqlSgkoL7dn1nvlGkvzMeNqpM3YY4gBmr-VLMqWP-C-RbJX3QZHHAsTuoQfTtwixAHE1Hgqpm1iL55QpY57JkrXAlwGsG_ec8-mfHRxTzPu6fDmj7A9Wbj5XEo6x4vQGXtjlgHTkJ8XZUOXC5JyXpuPNgAIbvSVCUdOrwCSQOyx7ODusDGR-b1JuePr1e4"/>
       </div>
     </div>
