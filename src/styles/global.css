@@ -1,0 +1,178 @@
+@import "tailwindcss";
+
+@theme {
+  /* Dynamic Colors via CSS Variables */
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  --color-surface-variant: var(--surface-variant);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  
+  --color-primary: var(--primary);
+  --color-primary-container: var(--primary-container);
+  --color-on-primary-container: var(--on-primary-container);
+  
+  --color-secondary: var(--secondary);
+  --color-secondary-container: var(--secondary-container);
+  
+  --color-error: var(--error);
+  --color-on-error: var(--on-error);
+
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+
+  /* Spacing (Static) */
+  --spacing-widget-padding: 20px;
+  --spacing-unit: 4px;
+  --spacing-margin: 24px;
+  --spacing-gutter: 16px;
+
+  /* Border Radius (Static) */
+  --radius-default: 0.125rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.5rem;
+  --radius-full: 9999px;
+
+  /* Typography (Static) */
+  --font-inter: "Inter", sans-serif;
+  --font-hanken: "Hanken Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --font-label-caps: var(--font-inter);
+  --font-body-base: var(--font-inter);
+  --font-data-tabular: var(--font-mono);
+  --font-headline-md: var(--font-hanken);
+  --font-display-lg: var(--font-hanken);
+}
+
+:root {
+  /* Light Theme - Derived from Inverse M3 Tokens */
+  --background: #e0e2ed; /* From inverse-surface */
+  --on-background: #10131b; /* From background */
+  --surface: #e0e2ed;
+  --surface-container: #d0d2dd;
+  --surface-container-low: #d8dae5;
+  --surface-container-high: #c8cad5;
+  --surface-container-highest: #b8bac5;
+  --surface-container-lowest: #f0f2fb;
+  --surface-variant: #c1c6d7;
+  --on-surface: #2d3039; /* From inverse-on-surface */
+  --on-surface-variant: #414754;
+  
+  --primary: #0059c5; /* From inverse-primary */
+  --primary-container: #d8e2ff;
+  --on-primary-container: #001a43;
+  
+  --secondary: #006c4c;
+  --secondary-container: #6ffbbe;
+  
+  --error: #ba1a1a;
+  --on-error: #ffffff;
+
+  --outline: #747781;
+  --outline-variant: #c4c6d0;
+  
+  --grid-color: rgba(0, 0, 0, 0.05);
+}
+
+.dark {
+  /* Dark Theme - As provided in code.html */
+  --background: #10131b;
+  --surface: #10131b;
+  --surface-container: #1c1f27;
+  --surface-container-low: #181b23;
+  --surface-container-high: #272a32;
+  --surface-container-highest: #32353d;
+  --surface-container-lowest: #0b0e15;
+  --surface-variant: #32353d;
+  --on-surface: #e0e2ed;
+  --on-surface-variant: #c1c6d7;
+  
+  --primary: #aec6ff;
+  --primary-container: #0070f3;
+  --on-primary-container: #ffffff;
+  
+  --secondary: #4edea3;
+  --secondary-container: #00a572;
+  
+  --error: #ffb4ab;
+  --on-error: #690005;
+
+  --outline: #8b90a0;
+  --outline-variant: #414754;
+  
+  --grid-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Custom Base Styles */
+@layer base {
+  body {
+    @apply bg-background text-on-surface font-body-base antialiased;
+  }
+}
+
+/* Custom Utilities */
+@layer utilities {
+  .bg-grid-pattern {
+    background-image: linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+                      linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .glass-panel {
+    @apply bg-surface/80 backdrop-blur-xl border border-outline/10;
+  }
+
+  .widget-glass {
+    @apply bg-surface/80 backdrop-blur-[24px] border border-outline/10;
+  }
+
+  .chart-glow-primary {
+    filter: drop-shadow(0 0 4px var(--primary));
+  }
+
+  .neon-glow-primary {
+    filter: drop-shadow(0 0 4px var(--primary));
+  }
+
+  .neon-glow-secondary {
+    filter: drop-shadow(0 0 4px var(--secondary));
+  }
+
+  .neon-glow-error {
+    filter: drop-shadow(0 0 4px var(--error));
+  }
+
+  .input-glow:focus {
+    box-shadow: inset 0 0 0 1px var(--primary);
+    outline: none;
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-outline-variant rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-outline;
+}
