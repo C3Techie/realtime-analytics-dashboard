@@ -66,7 +66,9 @@ const chartOptions = computed(() => {
       <div class="font-label-caps text-label-caps text-on-surface-variant">NODE_CLUSTER_HEALTH</div>
       <div class="flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-        <span class="text-[10px] font-data-tabular text-on-surface">60/60 ONLINE</span>
+        <span class="text-[10px] font-data-tabular text-on-surface uppercase">
+          {{ streamingStore.healthNodes.filter(n => n.status !== 'error').length }}/60 ONLINE
+        </span>
       </div>
     </div>
 

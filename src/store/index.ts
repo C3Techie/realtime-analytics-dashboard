@@ -7,10 +7,12 @@ export const useStreamingStore = defineStore('streaming', () => {
   const status = ref<StreamStatus>('connected');
 
   const metrics = reactive<Record<string, MetricData>>({
-    'BTC': { symbol: 'BTC', name: 'Bitcoin', value: 64231.50, change: 2.4, trend: 'up', history: [] },
-    'ETH': { symbol: 'ETH', name: 'Ethereum', value: 3450.12, change: -0.5, trend: 'down', history: [] },
-    'VOL': { symbol: 'VOL', name: 'Volume 24H', value: 1200000, change: 12, trend: 'up', history: [] },
-    'TPS': { symbol: 'TPS', name: 'System TPS', value: 4250, change: 0, trend: 'stable', history: [] }
+    'BTC': { symbol: 'BTC', name: 'Bitcoin', value: 0, change: 0, trend: 'stable', history: [] },
+    'ETH': { symbol: 'ETH', name: 'Ethereum', value: 0, change: 0, trend: 'stable', history: [] },
+    'SOL': { symbol: 'SOL', name: 'Solana', value: 0, change: 0, trend: 'stable', history: [] },
+    'BNB': { symbol: 'BNB', name: 'Binance Coin', value: 0, change: 0, trend: 'stable', history: [] },
+    'VOL': { symbol: 'VOL', name: 'Volume 24H', value: 0, change: 0, trend: 'stable', history: [] },
+    'TPS': { symbol: 'TPS', name: 'System TPS', value: 0, change: 0, trend: 'stable', history: [] }
   });
 
   const logs = ref<LogEntry[]>([]);
@@ -46,6 +48,11 @@ export const useStreamingStore = defineStore('streaming', () => {
     if (logs.value.length > 50) logs.value.pop();
   }
 
+  function updateHealthNode(id: number, status: 'active' | 'warning' | 'error') {
+    const node = healthNodes.value.find(n => n.id === id);
+    if (node) node.status = status;
+  }
+
   function setStatus(newStatus: StreamStatus) {
     status.value = newStatus;
     if (newStatus === 'paused') streamService.pause();
@@ -61,6 +68,7 @@ export const useStreamingStore = defineStore('streaming', () => {
     updateMetric,
     addMarketPoint,
     addLog,
+    updateHealthNode,
     setStatus
   };
 });

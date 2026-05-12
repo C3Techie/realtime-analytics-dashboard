@@ -1,27 +1,25 @@
 import type { StreamPayload, LogLevel } from '../types';
 
-export class MockStreamService {
-  private intervalId: number | null = null;
+export class BinanceStreamService {
+  private ws: WebSocket | null = null;
   private subscribers: ((payload: StreamPayload) => void)[] = [];
   private isPaused = false;
   private reconnectionAttempt = 0;
   private maxReconnectionAttempts = 5;
-  private frequencyMs: number;
+  // Use the binance.vision endpoint which is often more accessible
+  private baseUrl = 'wss://data-stream.binance.vision/stream?streams=btcusdt@ticker/ethusdt@ticker/solusdt@ticker/bnbusdt@ticker';
+  private simulationIntervalId: number | null = null;
+  private hasReceivedRealData = false;
 
-  constructor(frequencyMs: number = 500) {
-    this.frequencyMs = frequencyMs;
+  constructor() {
+    this.connect();
+    this.startEngine();
   }
 
   public subscribe(callback: (payload: StreamPayload) => void) {
     this.subscribers.push(callback);
-    if (!this.intervalId) {
-      this.start();
-    }
     return () => {
       this.subscribers = this.subscribers.filter(s => s !== callback);
-      if (this.subscribers.length === 0) {
-        this.stop();
-      }
     };
   }
 
@@ -33,118 +31,164 @@ export class MockStreamService {
     this.isPaused = false;
   }
 
-  private start() {
-    this.intervalId = window.setInterval(() => {
-      if (this.isPaused) return;
-
-      // Simulate occasional connection issues (0.5% chance)
-      if (Math.random() < 0.005) {
-        this.simulateDisconnection();
-        return;
-      }
-
-      this.generateData();
-    }, this.frequencyMs);
-  }
-
-  private stop() {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
+  private connect() {
+    if (this.ws) {
+      this.ws.close();
     }
-  }
 
-  private generateData() {
-    const timestamp = Date.now();
-    
-    // Broadcast Metric Update
-    const symbols = ['BTC', 'ETH', 'VOL', 'TPS'];
-    symbols.forEach(symbol => {
-      this.broadcast({
-        type: 'metric',
-        timestamp,
-        data: {
-          symbol,
-          value: this.getRandomValue(symbol),
-          change: (Math.random() * 2 - 1).toFixed(2)
+    try {
+      this.ws = new WebSocket(this.baseUrl);
+
+      this.ws.onopen = () => {
+        console.log('[BinanceStreamService] Connected to Real-Time Stream');
+        this.reconnectionAttempt = 0;
+      };
+
+      this.ws.onmessage = (event) => {
+        if (this.isPaused) return;
+        try {
+          const message = JSON.parse(event.data);
+          this.handleBinanceMessage(message);
+          this.hasReceivedRealData = true;
+        } catch (error) {
+          console.error('[BinanceStreamService] Parsing Error', error);
         }
-      });
-    });
+      };
 
-    // Broadcast Market Chart Point
-    this.broadcast({
-      type: 'market',
-      timestamp,
-      data: {
-        timestamp,
-        value: 64000 + Math.random() * 1000
-      }
-    });
+      this.ws.onerror = () => {
+        // Silently handle error, startSimulation will provide fallback data
+        this.hasReceivedRealData = false;
+      };
 
-    // Random Logs (Occasional)
-    if (Math.random() > 0.9) {
-      const levels: LogLevel[] = ['INFO', 'WARN', 'ERROR'];
-      const messages = [
-        'High frequency trade executed',
-        'API latency detected above 200ms',
-        'Block propagation delay',
-        'Validator node mismatch',
-        'Memory threshold exceeded'
-      ];
-      this.broadcast({
-        type: 'log',
-        timestamp,
-        data: {
-          id: Math.random().toString(36).substr(2, 9),
-          level: levels[Math.floor(Math.random() * levels.length)],
-          message: messages[Math.floor(Math.random() * messages.length)],
-          timestamp: new Date().toLocaleTimeString()
-        }
-      });
+      this.ws.onclose = () => {
+        this.hasReceivedRealData = false;
+        this.attemptReconnection();
+      };
+    } catch (e) {
+      console.error('[BinanceStreamService] Connection Failed', e);
+      this.hasReceivedRealData = false;
     }
-  }
-
-  private broadcast(payload: StreamPayload) {
-    // Basic Schema Validation
-    if (!payload.type || !payload.data || !payload.timestamp) {
-      console.warn('[StreamService] Malformed payload dropped', payload);
-      return;
-    }
-
-    this.subscribers.forEach(callback => callback(payload));
-  }
-
-  private getRandomValue(symbol: string) {
-    const bases: Record<string, number> = { 'BTC': 64000, 'ETH': 3400, 'VOL': 1200000, 'TPS': 4200 };
-    return bases[symbol] + (Math.random() * 100 - 50);
-  }
-
-  private simulateDisconnection() {
-    console.warn('[StreamService] Connection lost. Attempting reconnection...');
-    this.stop();
-    this.reconnectionAttempt = 1;
-    this.attemptReconnection();
   }
 
   private attemptReconnection() {
-    if (this.reconnectionAttempt > this.maxReconnectionAttempts) {
-      console.error('[StreamService] Max reconnection attempts reached.');
-      return;
-    }
+    if (this.reconnectionAttempt >= this.maxReconnectionAttempts) return;
+    this.reconnectionAttempt++;
+    setTimeout(() => this.connect(), 5000);
+  }
 
-    // Exponential Backoff
-    const delay = Math.pow(2, this.reconnectionAttempt) * 1000;
-    setTimeout(() => {
-      console.log(`[StreamService] Reconnection attempt ${this.reconnectionAttempt}...`);
-      if (Math.random() > 0.3) {
-        console.log('[StreamService] Reconnected successfully.');
-        this.start();
-      } else {
-        this.reconnectionAttempt++;
-        this.attemptReconnection();
+  private handleBinanceMessage(message: any) {
+    const data = message.data || message;
+    if (!data || !data.s) return;
+
+    const symbol = data.s.toUpperCase();
+    const symbolMap: Record<string, string> = {
+      'BTCUSDT': 'BTC', 'ETHUSDT': 'ETH', 'SOLUSDT': 'SOL', 'BNBUSDT': 'BNB'
+    };
+
+    const internalSymbol = symbolMap[symbol];
+    if (!internalSymbol) return;
+
+    const timestamp = Date.now();
+    this.broadcast({
+      type: 'metric',
+      timestamp,
+      data: {
+        symbol: internalSymbol,
+        value: parseFloat(data.c),
+        change: parseFloat(data.P)
       }
-    }, delay);
+    });
+
+    if (internalSymbol === 'BTC') {
+      this.broadcast({ type: 'market', timestamp, data: { timestamp, value: parseFloat(data.c) } });
+      this.broadcast({
+        type: 'metric',
+        timestamp,
+        data: { symbol: 'VOL', value: parseFloat(data.q), change: parseFloat(data.P) }
+      });
+    }
+  }
+
+  private startEngine() {
+    this.simulationIntervalId = window.setInterval(() => {
+      if (this.isPaused) return;
+      const timestamp = Date.now();
+
+      // Always simulate logs and TPS (System metrics)
+      if (Math.random() > 0.6) {
+        this.generateLog(timestamp);
+      }
+
+      this.broadcast({
+        type: 'metric',
+        timestamp,
+        data: { symbol: 'TPS', value: 4100 + Math.random() * 300, change: (Math.random() * 0.4 - 0.2).toFixed(2) }
+      });
+
+      // Simulate Health Node Updates
+      if (Math.random() > 0.8) {
+        this.broadcast({
+          type: 'health',
+          timestamp,
+          data: {
+            id: Math.floor(Math.random() * 60),
+            status: Math.random() > 0.95 ? 'error' : Math.random() > 0.8 ? 'warning' : 'active'
+          }
+        });
+      }
+
+      // ONLY simulate market data if the real-time stream hasn't kicked in
+      if (!this.hasReceivedRealData) {
+        this.generateFallbackMarketData(timestamp);
+      }
+    }, 1500);
+  }
+
+  private generateFallbackMarketData(timestamp: number) {
+    const fallbacks = [
+      { s: 'BTC', v: 64000, c: 1.2 },
+      { s: 'ETH', v: 3400, c: -0.5 },
+      { s: 'SOL', v: 145, c: 4.2 },
+      { s: 'BNB', v: 590, c: 0.8 },
+      { s: 'VOL', v: 1200000000, c: 2.1 }
+    ];
+
+    fallbacks.forEach(f => {
+      const value = f.v + (Math.random() * (f.v * 0.001) - (f.v * 0.0005));
+      this.broadcast({
+        type: 'metric',
+        timestamp,
+        data: { symbol: f.s, value, change: (f.c + (Math.random() * 0.2 - 0.1)).toFixed(2) }
+      });
+      if (f.s === 'BTC') {
+        this.broadcast({ type: 'market', timestamp, data: { timestamp, value } });
+      }
+    });
+  }
+
+  private generateLog(timestamp: number) {
+    const messages = [
+      'High frequency trade executed', 'API latency stabilized', 'Block propagation delay detected',
+      'Validator node handshake', 'Memory threshold nominal', 'Liquidity pool balanced',
+      'Nexus node sync complete', 'Encrypted tunnel established'
+    ];
+    this.broadcast({
+      type: 'log',
+      timestamp,
+      data: {
+        id: Math.random().toString(36).substring(2, 11),
+        level: Math.random() > 0.1 ? 'INFO' : 'WARN',
+        message: messages[Math.floor(Math.random() * messages.length)],
+        timestamp: new Date().toLocaleTimeString()
+      }
+    });
+  }
+
+  private broadcast(payload: StreamPayload) {
+    if (this.isPaused) return;
+    this.subscribers.forEach(callback => callback(payload));
   }
 }
 
-export const streamService = new MockStreamService();
+export const streamService = new BinanceStreamService();
+

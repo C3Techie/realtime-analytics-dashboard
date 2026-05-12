@@ -25,6 +25,9 @@ export function useStreamSubscription() {
       case 'log':
         store.addLog(payload.data);
         break;
+      case 'health':
+        store.updateHealthNode(payload.data.id, payload.data.status);
+        break;
     }
   };
 

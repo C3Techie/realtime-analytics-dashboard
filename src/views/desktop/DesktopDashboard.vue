@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useUIStore, useStreamingStore } from '../../store';
 import TopNavBar from '../../components/layout/TopNavBar.vue';
 import SideNavBar from '../../components/layout/SideNavBar.vue';
@@ -12,12 +13,12 @@ import SystemHealthHeatmap from '../../components/metrics/SystemHealthHeatmap.vu
 const uiStore = useUIStore();
 const streamingStore = useStreamingStore();
 
-const distributionData = [
-  { name: 'BTC', value: 45 },
-  { name: 'ETH', value: 30 },
-  { name: 'USDT', value: 15 },
-  { name: 'BNB', value: 10 }
-];
+const distributionData = computed(() => [
+  { name: 'BTC', value: streamingStore.metrics['BTC']?.value > 0 ? 45 : 0 },
+  { name: 'ETH', value: streamingStore.metrics['ETH']?.value > 0 ? 30 : 0 },
+  { name: 'SOL', value: streamingStore.metrics['SOL']?.value > 0 ? 15 : 0 },
+  { name: 'BNB', value: streamingStore.metrics['BNB']?.value > 0 ? 10 : 0 }
+].filter(d => d.value > 0));
 </script>
 
 <template>

@@ -1,9 +1,22 @@
 <script setup lang="ts">
-const alerts = [
-  { id: 1, type: 'CRITICAL', title: 'LATENCY SPIKE', message: 'Mainnet nodes showing 450ms+ delay', time: 'JUST NOW', status: 'active' },
-  { id: 2, type: 'WARNING', title: 'CAPACITY', message: 'Storage Cluster B at 88% utilization', time: '12M AGO', status: 'pending' },
-  { id: 3, type: 'SECURITY', title: 'FIREWALL', message: 'IP 192.168.1.104 blocked after 3 attempts', time: '1H AGO', status: 'resolved' }
-];
+import { computed } from 'vue';
+import { useStreamingStore } from '../../store';
+
+const streamingStore = useStreamingStore();
+
+const alerts = computed(() => {
+  return streamingStore.logs
+    .filter(log => log.level === 'ERROR' || log.level === 'WARN')
+    .slice(0, 3) // Show top 3 recent alerts
+    .map(log => ({
+      id: log.id,
+      type: log.level === 'ERROR' ? 'CRITICAL' : 'WARNING',
+      title: log.message.split(' ').slice(0, 2).join('_').toUpperCase(), // Generate a title from message
+      message: log.message,
+      time: 'JUST NOW',
+      status: 'active'
+    }));
+});
 </script>
 
 <template>
