@@ -16,7 +16,7 @@ const chartOptions = computed(() => ({
     right: 20,
     bottom: 20,
     left: 40,
-    containLabel: true
+
   },
   tooltip: {
     trigger: 'item',
@@ -39,16 +39,15 @@ const chartOptions = computed(() => ({
   },
   series: [{
     type: 'bar',
-    data: props.data.map(d => d.value),
+    data: props.data.map(d => ({
+      value: d.value,
+      itemStyle: {
+        color: d.name === 'BTC' ? '#aec6ff' : 
+               d.name === 'ETH' ? '#4edea3' : 
+               d.name === 'SOL' ? '#ffb596' : '#d1d5db'
+      }
+    })),
     itemStyle: {
-      color: {
-        type: 'linear',
-        x: 0, y: 0, x2: 0, y2: 1,
-        colorStops: [
-          { offset: 0, color: '#aec6ff' },
-          { offset: 1, color: '#0070f3' }
-        ]
-      },
       borderRadius: [4, 4, 0, 0]
     },
     barWidth: '40%'

@@ -1,4 +1,4 @@
-import type { StreamPayload, LogLevel } from '../types';
+import type { StreamPayload } from '../types';
 
 export class BinanceStreamService {
   private ws: WebSocket | null = null;
@@ -8,8 +8,7 @@ export class BinanceStreamService {
   private maxReconnectionAttempts = 5;
   // Use the binance.vision endpoint which is often more accessible
   private baseUrl = 'wss://data-stream.binance.vision/stream?streams=btcusdt@ticker/ethusdt@ticker/solusdt@ticker/bnbusdt@ticker';
-  private simulationIntervalId: number | null = null;
-  private hasReceivedRealData = false;
+  private receivedRealSymbols = new Set<string>();
 
   constructor() {
     this.connect();
@@ -49,7 +48,6 @@ export class BinanceStreamService {
         try {
           const message = JSON.parse(event.data);
           this.handleBinanceMessage(message);
-          this.hasReceivedRealData = true;
         } catch (error) {
           console.error('[BinanceStreamService] Parsing Error', error);
         }
@@ -57,16 +55,13 @@ export class BinanceStreamService {
 
       this.ws.onerror = () => {
         // Silently handle error, startSimulation will provide fallback data
-        this.hasReceivedRealData = false;
       };
 
       this.ws.onclose = () => {
-        this.hasReceivedRealData = false;
         this.attemptReconnection();
       };
     } catch (e) {
       console.error('[BinanceStreamService] Connection Failed', e);
-      this.hasReceivedRealData = false;
     }
   }
 
@@ -88,6 +83,7 @@ export class BinanceStreamService {
     const internalSymbol = symbolMap[symbol];
     if (!internalSymbol) return;
 
+    this.receivedRealSymbols.add(internalSymbol);
     const timestamp = Date.now();
     this.broadcast({
       type: 'metric',
@@ -99,8 +95,13 @@ export class BinanceStreamService {
       }
     });
 
+    this.broadcast({
+      type: 'market',
+      timestamp,
+      data: { symbol: internalSymbol, timestamp, value: parseFloat(data.c) }
+    });
+
     if (internalSymbol === 'BTC') {
-      this.broadcast({ type: 'market', timestamp, data: { timestamp, value: parseFloat(data.c) } });
       this.broadcast({
         type: 'metric',
         timestamp,
@@ -110,7 +111,7 @@ export class BinanceStreamService {
   }
 
   private startEngine() {
-    this.simulationIntervalId = window.setInterval(() => {
+    window.setInterval(() => {
       if (this.isPaused) return;
       const timestamp = Date.now();
 
@@ -137,10 +138,19 @@ export class BinanceStreamService {
         });
       }
 
-      // ONLY simulate market data if the real-time stream hasn't kicked in
-      if (!this.hasReceivedRealData) {
-        this.generateFallbackMarketData(timestamp);
-      }
+      // Simulate System Summary Metrics
+      this.broadcast({
+        type: 'system',
+        timestamp,
+        data: {
+          latency: 15 + Math.floor(Math.random() * 15),
+          uptime: 99.95 + (Math.random() * 0.04),
+          load: Math.random() > 0.9 ? 'HEAVY' : Math.random() > 0.7 ? 'STABLE' : 'OPTIMAL'
+        }
+      });
+
+      // ONLY simulate market data for symbols that haven't received real data
+      this.generateFallbackMarketData(timestamp);
     }, 1500);
   }
 
@@ -154,15 +164,19 @@ export class BinanceStreamService {
     ];
 
     fallbacks.forEach(f => {
+      if (this.receivedRealSymbols.has(f.s)) return;
+      
       const value = f.v + (Math.random() * (f.v * 0.001) - (f.v * 0.0005));
       this.broadcast({
         type: 'metric',
         timestamp,
         data: { symbol: f.s, value, change: (f.c + (Math.random() * 0.2 - 0.1)).toFixed(2) }
       });
-      if (f.s === 'BTC') {
-        this.broadcast({ type: 'market', timestamp, data: { timestamp, value } });
-      }
+      this.broadcast({
+        type: 'market',
+        timestamp,
+        data: { symbol: f.s, timestamp, value }
+      });
     });
   }
 
@@ -177,7 +191,7 @@ export class BinanceStreamService {
       timestamp,
       data: {
         id: Math.random().toString(36).substring(2, 11),
-        level: Math.random() > 0.1 ? 'INFO' : 'WARN',
+        level: Math.random() > 0.8 ? 'ERROR' : Math.random() > 0.4 ? 'WARN' : 'INFO',
         message: messages[Math.floor(Math.random() * messages.length)],
         timestamp: new Date().toLocaleTimeString()
       }

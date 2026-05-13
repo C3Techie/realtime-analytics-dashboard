@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useStreamingStore } from '../../store';
 
-const store = useStreamingStore();
+
+
 </script>
 
 <template>

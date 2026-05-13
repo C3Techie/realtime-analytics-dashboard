@@ -12,9 +12,12 @@ const uiStore = useUIStore();
 
 const chartOptions = computed(() => {
   const isDark = uiStore.isDark;
-  const primaryColor = props.color === 'var(--primary)' 
-    ? (isDark ? '#aec6ff' : '#0059c5')
-    : (props.color || '#aec6ff');
+  const primaryColor = (() => {
+    if (props.color === 'var(--primary)') return isDark ? '#aec6ff' : '#0059c5';
+    if (props.color === 'var(--secondary)') return '#4edea3';
+    if (props.color === 'var(--tertiary)') return '#ffb596';
+    return props.color || '#aec6ff';
+  })();
 
   return {
     backgroundColor: 'transparent',
@@ -22,8 +25,7 @@ const chartOptions = computed(() => {
       top: 10,
       right: 10,
       bottom: 20,
-      left: 40,
-      containLabel: true
+      left: 40
     },
     tooltip: {
       trigger: 'axis',

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useStreamingStore } from '../../store';
+import { useStreamingStore, useUIStore } from '../../store';
 
 const streamingStore = useStreamingStore();
+const uiStore = useUIStore();
 
 const alerts = computed(() => {
   return streamingStore.logs
@@ -17,6 +18,10 @@ const alerts = computed(() => {
       status: 'active'
     }));
 });
+
+const handleViewAll = () => {
+  uiStore.addToast('Security Violation: Access Denied. Elevated privileges required.', 'error');
+};
 </script>
 
 <template>
@@ -26,7 +31,7 @@ const alerts = computed(() => {
         <span class="material-symbols-outlined text-[18px]">warning</span>
         SYSTEM_ALERTS
       </div>
-      <span class="px-2 py-0.5 rounded-full bg-error/10 text-error text-[10px] font-bold">3 ACTIVE</span>
+      <span class="px-2 py-0.5 rounded-full bg-error/10 text-error text-[10px] font-bold">{{ alerts.length }} ACTIVE</span>
     </div>
 
     <div class="p-4 space-y-4">
@@ -48,7 +53,10 @@ const alerts = computed(() => {
     </div>
     
     <div class="mt-auto p-4 bg-surface-container-low/30 border-t border-outline/5">
-      <button class="w-full py-2 bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-[11px] font-label-caps rounded-default transition-all duration-200 border border-outline/10 uppercase tracking-widest">
+      <button 
+        @click="handleViewAll"
+        class="w-full py-2 bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-[11px] font-label-caps rounded-default transition-all duration-200 border border-outline/10 uppercase tracking-widest"
+      >
         VIEW ALL PROTOCOLS
       </button>
     </div>

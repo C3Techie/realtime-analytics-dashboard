@@ -8,7 +8,7 @@ import { useStreamSubscription } from './composables/useStreamSubscription';
 import { useUIStore } from './store';
 import { onMounted } from 'vue';
 
-const { isMobile, isTablet, isDesktop } = useBreakpoint();
+const { isMobile, isTablet } = useBreakpoint();
 const uiStore = useUIStore();
 
 // Initialize the data stream and theme

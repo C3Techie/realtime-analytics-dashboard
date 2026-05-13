@@ -13,12 +13,22 @@ import SystemHealthHeatmap from '../../components/metrics/SystemHealthHeatmap.vu
 const uiStore = useUIStore();
 const streamingStore = useStreamingStore();
 
-const distributionData = computed(() => [
-  { name: 'BTC', value: streamingStore.metrics['BTC']?.value > 0 ? 45 : 0 },
-  { name: 'ETH', value: streamingStore.metrics['ETH']?.value > 0 ? 30 : 0 },
-  { name: 'SOL', value: streamingStore.metrics['SOL']?.value > 0 ? 15 : 0 },
-  { name: 'BNB', value: streamingStore.metrics['BNB']?.value > 0 ? 10 : 0 }
-].filter(d => d.value > 0));
+const distributionData = computed(() => {
+  const assets = [
+    { name: 'BTC', weight: 1.2, value: streamingStore.metrics['BTC']?.value || 0 },
+    { name: 'ETH', weight: 0.8, value: streamingStore.metrics['ETH']?.value || 0 },
+    { name: 'SOL', weight: 0.4, value: streamingStore.metrics['SOL']?.value || 0 },
+    { name: 'BNB', weight: 0.3, value: streamingStore.metrics['BNB']?.value || 0 }
+  ];
+  
+  const totalWeight = assets.reduce((sum, a) => sum + (a.value * a.weight), 0);
+  if (totalWeight === 0) return [];
+  
+  return assets.map(a => ({
+    name: a.name,
+    value: Math.round(((a.value * a.weight) / totalWeight) * 100)
+  })).filter(d => d.value > 0);
+});
 </script>
 
 <template>

@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { MetricData } from '../../types';
-import { useUIStore } from '../../store';
+
 
 const props = defineProps<{
   metric: MetricData;
 }>();
-
-const uiStore = useUIStore();
 
 const isPositive = computed(() => props.metric.change >= 0);
 

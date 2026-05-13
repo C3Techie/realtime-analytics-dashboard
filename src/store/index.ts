@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref, reactive, shallowRef } from 'vue';
+import { ref, reactive } from 'vue';
 import type { MetricData, LogEntry, HealthNode, ChartPoint, StreamStatus, TimeRange } from '../types';
 import { streamService } from '../services/StreamService';
 
@@ -17,13 +17,21 @@ export const useStreamingStore = defineStore('streaming', () => {
 
   const logs = ref<LogEntry[]>([]);
   // Use shallowRef for high-frequency time-series to optimize performance
-  const marketData = shallowRef<ChartPoint[]>([]);
+  const marketData = reactive<Record<string, ChartPoint[]>>({
+    'BTC': [], 'ETH': [], 'SOL': [], 'BNB': []
+  });
   const healthNodes = ref<HealthNode[]>(
     Array.from({ length: 60 }, (_, i) => ({
       id: i,
       status: 'active'
     }))
   );
+
+  const systemSummary = reactive({
+    latency: 0,
+    uptime: 100,
+    load: 'OPTIMAL'
+  });
 
   function updateMetric(symbol: string, value: number, change: number) {
     if (metrics[symbol]) {
@@ -36,11 +44,11 @@ export const useStreamingStore = defineStore('streaming', () => {
     }
   }
 
-  function addMarketPoint(point: ChartPoint) {
-    const newData = [...marketData.value, point];
-    // Keep last 100 points for live view
-    if (newData.length > 100) newData.shift();
-    marketData.value = newData;
+  function addMarketPoint(symbol: string, point: ChartPoint) {
+    if (!marketData[symbol]) marketData[symbol] = [];
+    marketData[symbol].push(point);
+    // Keep last 1000 points per series (approx 25 mins @ 1.5s)
+    if (marketData[symbol].length > 1000) marketData[symbol].shift();
   }
 
   function addLog(log: LogEntry) {
@@ -59,6 +67,12 @@ export const useStreamingStore = defineStore('streaming', () => {
     else if (newStatus === 'connected') streamService.resume();
   }
 
+  function updateSystemSummary(data: { latency: number; uptime: number; load: string }) {
+    systemSummary.latency = data.latency;
+    systemSummary.uptime = data.uptime;
+    systemSummary.load = data.load;
+  }
+
   return {
     status,
     metrics,
@@ -69,7 +83,9 @@ export const useStreamingStore = defineStore('streaming', () => {
     addMarketPoint,
     addLog,
     updateHealthNode,
-    setStatus
+    updateSystemSummary,
+    setStatus,
+    systemSummary
   };
 });
 

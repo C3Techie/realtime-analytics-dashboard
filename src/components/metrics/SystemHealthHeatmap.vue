@@ -79,15 +79,17 @@ const chartOptions = computed(() => {
     <div class="grid grid-cols-3 gap-2 mt-auto">
       <div class="bg-surface-container-low p-2 rounded-default border border-outline/5">
         <div class="text-[9px] font-label-caps text-outline mb-1 uppercase tracking-tighter">Latency</div>
-        <div class="text-[12px] font-data-tabular text-on-surface">24ms</div>
+        <div class="text-[12px] font-data-tabular text-on-surface">{{ streamingStore.systemSummary.latency }}ms</div>
       </div>
       <div class="bg-surface-container-low p-2 rounded-default border border-outline/5">
         <div class="text-[9px] font-label-caps text-outline mb-1 uppercase tracking-tighter">Uptime</div>
-        <div class="text-[12px] font-data-tabular text-on-surface">99.98%</div>
+        <div class="text-[12px] font-data-tabular text-on-surface">{{ streamingStore.systemSummary.uptime.toFixed(2) }}%</div>
       </div>
       <div class="bg-surface-container-low p-2 rounded-default border border-outline/5">
         <div class="text-[9px] font-label-caps text-outline mb-1 uppercase tracking-tighter">Load</div>
-        <div class="text-[12px] font-data-tabular text-secondary">Optimal</div>
+        <div class="text-[12px] font-data-tabular" :class="streamingStore.systemSummary.load === 'HEAVY' ? 'text-error' : 'text-secondary'">
+          {{ streamingStore.systemSummary.load }}
+        </div>
       </div>
     </div>
   </div>

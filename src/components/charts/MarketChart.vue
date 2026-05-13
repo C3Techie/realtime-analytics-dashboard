@@ -1,23 +1,21 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useStreamingStore, useUIStore } from '../../store';
+import type { TimeRange } from '../../types';
 import LineChart from './LineChart.vue';
 
 const streamingStore = useStreamingStore();
 const uiStore = useUIStore();
 
-const timeRanges = ['1m', '5m', '1h', 'live'];
-const visibleSeries = ref(['BTC']); // Currently single series toggling implemented for brevity
+const timeRanges: TimeRange[] = ['1m', '5m', '1h', 'live'];
+const selectedSymbol = ref('BTC');
 
 const toggleSeries = (symbol: string) => {
-  if (visibleSeries.value.includes(symbol)) {
-    if (visibleSeries.value.length > 1) {
-      visibleSeries.value = visibleSeries.value.filter(s => s !== symbol);
-    }
-  } else {
-    visibleSeries.value.push(symbol);
-  }
+  selectedSymbol.value = symbol;
 };
+
+const currentMetric = computed(() => streamingStore.metrics[selectedSymbol.value]);
+const currentMarketData = computed(() => streamingStore.marketData[selectedSymbol.value] || []);
 </script>
 
 <template>
@@ -27,14 +25,20 @@ const toggleSeries = (symbol: string) => {
         <div class="font-label-caps text-label-caps text-on-surface-variant">MARKET_TERMINAL</div>
         <div class="flex items-center gap-2 mt-1">
           <span class="text-display-lg font-bold text-on-surface tabular-nums">
-            <template v-if="streamingStore.marketData.length > 0">
-              ${{ streamingStore.metrics['BTC']?.value.toLocaleString(undefined, { minimumFractionDigits: 2 }) }}
+            <template v-if="currentMarketData.length > 0">
+              ${{ currentMetric?.value.toLocaleString(undefined, { minimumFractionDigits: 2 }) }}
             </template>
             <template v-else>
               <span class="opacity-20 animate-pulse">CONNECTING...</span>
             </template>
           </span>
-          <span v-if="streamingStore.marketData.length > 0" class="text-secondary font-data-tabular text-[13px] font-bold">+2.45%</span>
+          <span 
+            v-if="currentMarketData.length > 0" 
+            class="font-data-tabular text-[13px] font-bold"
+            :class="currentMetric?.change >= 0 ? 'text-secondary' : 'text-error'"
+          >
+            {{ currentMetric?.change >= 0 ? '+' : '' }}{{ currentMetric?.change }}%
+          </span>
         </div>
       </div>
       
@@ -52,10 +56,10 @@ const toggleSeries = (symbol: string) => {
     </div>
 
     <div class="flex-1 w-full relative min-h-[240px] flex items-center justify-center">
-      <template v-if="streamingStore.marketData.length > 0">
+      <template v-if="currentMarketData.length > 0">
         <LineChart 
-          :data="streamingStore.marketData" 
-          color="var(--primary)"
+          :data="currentMarketData" 
+          :color="selectedSymbol === 'BTC' ? 'var(--primary)' : 'var(--secondary)'"
           height="240px"
         />
       </template>
@@ -67,13 +71,21 @@ const toggleSeries = (symbol: string) => {
 
     <div class="flex justify-between items-center pt-4 border-t border-outline/10 text-[11px] font-label-caps text-on-surface-variant">
       <div class="flex gap-4">
-        <button @click="toggleSeries('BTC')" class="flex items-center gap-1.5 transition-opacity" :class="visibleSeries.includes('BTC') ? 'opacity-100' : 'opacity-30'">
+        <button @click="toggleSeries('BTC')" class="flex items-center gap-1.5 transition-opacity" :class="selectedSymbol === 'BTC' ? 'opacity-100' : 'opacity-30'">
           <span class="w-2 h-2 rounded-full bg-primary neon-glow-primary"></span>
           <span>BTC/USD</span>
         </button>
-        <button @click="toggleSeries('ETH')" class="flex items-center gap-1.5 transition-opacity" :class="visibleSeries.includes('ETH') ? 'opacity-100' : 'opacity-30'">
-          <span class="w-2 h-2 rounded-full bg-secondary neon-glow-secondary opacity-40"></span>
+        <button @click="toggleSeries('ETH')" class="flex items-center gap-1.5 transition-opacity" :class="selectedSymbol === 'ETH' ? 'opacity-100' : 'opacity-30'">
+          <span class="w-2 h-2 rounded-full bg-secondary neon-glow-secondary"></span>
           <span>ETH/USD</span>
+        </button>
+        <button @click="toggleSeries('SOL')" class="flex items-center gap-1.5 transition-opacity" :class="selectedSymbol === 'SOL' ? 'opacity-100' : 'opacity-30'">
+          <span class="w-2 h-2 rounded-full bg-tertiary neon-glow-tertiary"></span>
+          <span>SOL/USD</span>
+        </button>
+        <button @click="toggleSeries('BNB')" class="flex items-center gap-1.5 transition-opacity" :class="selectedSymbol === 'BNB' ? 'opacity-100' : 'opacity-30'">
+          <span class="w-2 h-2 rounded-full bg-[#f3ba2f] shadow-[0_0_8px_rgba(243,186,47,0.5)]"></span>
+          <span>BNB/USD</span>
         </button>
       </div>
       <div class="flex items-center gap-2">

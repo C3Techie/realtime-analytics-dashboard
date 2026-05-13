@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useUIStore } from '../../store';
-import { useBreakpoint } from '../../composables/useBreakpoint';
+
 
 const uiStore = useUIStore();
-const { isDesktop } = useBreakpoint();
+
 
 const navItems = [
   { id: 'overview', icon: 'dashboard', label: 'Overview' }

@@ -20,13 +20,16 @@ export function useStreamSubscription() {
         };
         break;
       case 'market':
-        store.addMarketPoint(payload.data);
+        store.addMarketPoint(payload.data.symbol, payload.data);
         break;
       case 'log':
         store.addLog(payload.data);
         break;
       case 'health':
         store.updateHealthNode(payload.data.id, payload.data.status);
+        break;
+      case 'system':
+        store.updateSystemSummary(payload.data);
         break;
     }
   };

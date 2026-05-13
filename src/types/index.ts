@@ -31,7 +31,7 @@ export interface ChartPoint {
 }
 
 export interface StreamPayload {
-  type: 'metric' | 'log' | 'health' | 'market';
+  type: 'metric' | 'log' | 'health' | 'market' | 'system';
   data: any;
   timestamp: number;
 }

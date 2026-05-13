@@ -15,10 +15,10 @@ To demonstrate frontend engineering maturity through the implementation of a sca
 
 ## 🏗️ Architecture Explanation
 The project follows a clean, unidirectional data flow architecture:
-1. **Service Layer (`StreamService.ts`):** Isolated mock streaming engine that simulates WebSocket/SSE traffic. It handles reconnection logic, exponential backoff, and payload validation.
-2. **Composable Layer (`useStreamSubscription.ts`):** Orchestrates the connection between the service and the store. Implements **Update Batching** to reduce reactive overhead.
-3. **State Layer (Pinia):** Centralized hub for metrics, market data, and activity logs. Uses `shallowRef` for high-frequency time-series data to optimize memory usage.
-4. **Component Layer:** Reusable, theme-aware ECharts wrappers and high-density KPI cards.
+1. **Service Layer (`StreamService.ts`):** Resilient streaming engine that connects to the **Binance WebSocket API** (`wss://data-stream.binance.vision`). It handles real-time ticker data, reconnection logic with exponential backoff, and provides a fallback simulation if the primary stream is unreachable.
+2. **Composable Layer (`useStreamSubscription.ts`):** Orchestrates the connection between the service and the store. Implements **High-Frequency Update Batching** (4Hz) to reduce reactive overhead.
+3. **State Layer (Pinia):** Centralized hub for metrics, market data, and activity logs. Uses `shallowRef` for high-frequency time-series data to optimize memory usage and prevent UI jank.
+4. **Component Layer:** Reusable, theme-aware ECharts wrappers and high-density KPI cards that react instantly to state changes.
 
 ## ⚡ Performance Optimizations
 - **Metric Batching:** Instead of updating the UI on every message, updates are batched into 250ms cycles (4Hz) to prevent UI thread choking while maintaining a "live" feel.
@@ -27,9 +27,10 @@ The project follows a clean, unidirectional data flow architecture:
 - **Efficient Slicing:** Continuous array slicing ensures that memory usage remains constant regardless of session duration.
 
 ## 📡 Data Streaming Strategy
-- **Simulation:** A class-based `MockStreamService` broadcasts `StreamPayload` objects.
-- **Resilience:** Built-in simulation for connection drops with a 5-step exponential backoff retry strategy.
-- **Validation:** Every payload is sanitized and validated against a schema before being accepted into the state.
+- **Real-Time API:** Consumes live market data from Binance for major pairs (BTC, ETH, SOL, BNB).
+- **Hybrid Streaming:** Implements a hybrid approach where real-time market data is merged with simulated system telemetry (Node health, logs) to create a comprehensive "alive" dashboard.
+- **Resilience:** Built-in connection monitoring with a 5-step exponential backoff retry strategy and seamless fallback to simulated data during API outages.
+- **Validation:** Every payload is sanitized and validated before being committed to the global state.
 
 ## 📱 Responsive Strategy
 The system uses a custom responsive engine via the `useBreakpoint` composable to handle layout shifts dynamically:
@@ -57,4 +58,4 @@ The system uses a custom responsive engine via the `useBreakpoint` composable to
 
 ## ⚖️ Trade-offs & Decisions
 - **ECharts vs D3:** Chose ECharts for its superior out-of-the-box performance with large datasets and built-in Canvas/SVG rendering flexibility.
-- **Mock Service vs API:** Implemented a sophisticated mock service to guarantee high-frequency "chaos" testing (disconnections, malformed data) which is often harder to simulate with stable public APIs.
+- **Binance API vs Custom Backend:** Utilized the public Binance WebSocket API to demonstrate high-frequency data handling, while simulating system-specific metrics (Node Cluster Health) to provide a complete "Command Center" experience.
