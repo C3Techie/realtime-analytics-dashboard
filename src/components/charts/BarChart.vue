@@ -44,7 +44,8 @@ const chartOptions = computed(() => ({
       itemStyle: {
         color: d.name === 'BTC' ? '#aec6ff' : 
                d.name === 'ETH' ? '#4edea3' : 
-               d.name === 'SOL' ? '#ffb596' : '#d1d5db'
+               d.name === 'SOL' ? '#a855f7' : 
+               d.name === 'BNB' ? '#f3ba2f' : '#d1d5db'
       }
     })),
     itemStyle: {

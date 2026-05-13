@@ -126,8 +126,8 @@ export class BinanceStreamService {
         data: { symbol: 'TPS', value: 4100 + Math.random() * 300, change: (Math.random() * 0.4 - 0.2).toFixed(2) }
       });
 
-      // Simulate Health Node Updates
-      if (Math.random() > 0.8) {
+      // Simulate Health Node Updates (Increased frequency for "live" feel)
+      if (Math.random() > 0.4) {
         this.broadcast({
           type: 'health',
           timestamp,

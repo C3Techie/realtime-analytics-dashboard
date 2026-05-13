@@ -17,20 +17,26 @@ To demonstrate frontend engineering maturity through the implementation of a sca
 The project follows a clean, unidirectional data flow architecture:
 1. **Service Layer (`StreamService.ts`):** Resilient streaming engine that connects to the **Binance WebSocket API** (`wss://data-stream.binance.vision`). It handles real-time ticker data, reconnection logic with exponential backoff, and provides a fallback simulation if the primary stream is unreachable.
 2. **Composable Layer (`useStreamSubscription.ts`):** Orchestrates the connection between the service and the store. Implements **High-Frequency Update Batching** (4Hz) to reduce reactive overhead.
-3. **State Layer (Pinia):** Centralized hub for metrics, market data, and activity logs. Uses `shallowRef` for high-frequency time-series data to optimize memory usage and prevent UI jank.
+3. **State Layer (Pinia):** Centralized hub for metrics, market data, and activity logs. Optimized for high-frequency time-series data with a 1,000-point circular buffer per asset to ensure smooth historical trends.
 4. **Component Layer:** Reusable, theme-aware ECharts wrappers and high-density KPI cards that react instantly to state changes.
+
+## 🕹️ Interactive Features
+- **Asset Terminal:** Toggle between BTC, ETH, SOL, and BNB with real-time price synchronization and color-coded visuals.
+- **Time-Range Filtering:** Switch between 1m, 5m, 1h, and LIVE views for historical market analysis.
+- **Node Cluster Telemetry:** A 60-node real-time heatmap simulating backend cluster health with instant status updates.
+- **Security Protocols:** Interactive "View All Protocols" action protected by a theme-aware toast notification system (simulating permission-based access).
+- **Log Management:** Real-time Activity Feed with severity-based filtering (Info, Warn, Error).
 
 ## ⚡ Performance Optimizations
 - **Metric Batching:** Instead of updating the UI on every message, updates are batched into 250ms cycles (4Hz) to prevent UI thread choking while maintaining a "live" feel.
-- **Reactivity Tuning:** Used `shallowRef` for large arrays (Market Data) to avoid the overhead of recursive proxying.
+- **Data Buffering:** Uses a 1,000-point window for market data history, balanced across multiple assets to maintain memory efficiency.
 - **Chart Throttling:** ECharts animations are disabled for real-time series to ensure frame stability during rapid data shifts.
-- **Efficient Slicing:** Continuous array slicing ensures that memory usage remains constant regardless of session duration.
+- **Hex Color Mapping:** Dynamic resolution of CSS variables to hex codes for ECharts gradients, preventing canvas rendering crashes.
 
 ## 📡 Data Streaming Strategy
 - **Real-Time API:** Consumes live market data from Binance for major pairs (BTC, ETH, SOL, BNB).
 - **Hybrid Streaming:** Implements a hybrid approach where real-time market data is merged with simulated system telemetry (Node health, logs) to create a comprehensive "alive" dashboard.
 - **Resilience:** Built-in connection monitoring with a 5-step exponential backoff retry strategy and seamless fallback to simulated data during API outages.
-- **Validation:** Every payload is sanitized and validated before being committed to the global state.
 
 ## 📱 Responsive Strategy
 The system uses a custom responsive engine via the `useBreakpoint` composable to handle layout shifts dynamically:
@@ -59,3 +65,4 @@ The system uses a custom responsive engine via the `useBreakpoint` composable to
 ## ⚖️ Trade-offs & Decisions
 - **ECharts vs D3:** Chose ECharts for its superior out-of-the-box performance with large datasets and built-in Canvas/SVG rendering flexibility.
 - **Binance API vs Custom Backend:** Utilized the public Binance WebSocket API to demonstrate high-frequency data handling, while simulating system-specific metrics (Node Cluster Health) to provide a complete "Command Center" experience.
+- **Color Logic:** Implemented a custom hex-resolver for CSS variables to ensure ECharts compatibility with modern CSS design systems.

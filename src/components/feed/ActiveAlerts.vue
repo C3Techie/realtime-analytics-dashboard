@@ -14,7 +14,7 @@ const alerts = computed(() => {
       type: log.level === 'ERROR' ? 'CRITICAL' : 'WARNING',
       title: log.message.split(' ').slice(0, 2).join('_').toUpperCase(), // Generate a title from message
       message: log.message,
-      time: 'JUST NOW',
+      time: log.timestamp,
       status: 'active'
     }));
 });

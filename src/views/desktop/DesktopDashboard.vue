@@ -15,18 +15,18 @@ const streamingStore = useStreamingStore();
 
 const distributionData = computed(() => {
   const assets = [
-    { name: 'BTC', weight: 1.2, value: streamingStore.metrics['BTC']?.value || 0 },
-    { name: 'ETH', weight: 0.8, value: streamingStore.metrics['ETH']?.value || 0 },
-    { name: 'SOL', weight: 0.4, value: streamingStore.metrics['SOL']?.value || 0 },
-    { name: 'BNB', weight: 0.3, value: streamingStore.metrics['BNB']?.value || 0 }
+    { name: 'BTC', qty: 0.1, value: streamingStore.metrics['BTC']?.value || 64000 },
+    { name: 'ETH', qty: 2.0, value: streamingStore.metrics['ETH']?.value || 3400 },
+    { name: 'SOL', qty: 50.0, value: streamingStore.metrics['SOL']?.value || 145 },
+    { name: 'BNB', qty: 10.0, value: streamingStore.metrics['BNB']?.value || 590 }
   ];
   
-  const totalWeight = assets.reduce((sum, a) => sum + (a.value * a.weight), 0);
-  if (totalWeight === 0) return [];
+  const totalValue = assets.reduce((sum, a) => sum + (a.value * a.qty), 0);
+  if (totalValue === 0) return [];
   
   return assets.map(a => ({
     name: a.name,
-    value: Math.round(((a.value * a.weight) / totalWeight) * 100)
+    value: Math.round(((a.value * a.qty) / totalValue) * 100)
   })).filter(d => d.value > 0);
 });
 </script>
@@ -79,8 +79,7 @@ const distributionData = computed(() => {
           <!-- Right Column: Feeds -->
           <div class="col-span-12 lg:col-span-4 space-y-6 flex flex-col">
              <div class="h-[400px] lg:h-[calc(100vh-380px)] lg:min-h-[400px]">
-               <ActivityFeed />
-             </div>
+               <ActivityFeed /></div>
              <div class="shrink-0">
                <ActiveAlerts />
              </div>
