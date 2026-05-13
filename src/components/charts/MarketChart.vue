@@ -69,28 +69,28 @@ const currentMarketData = computed(() => streamingStore.marketData[selectedSymbo
       </div>
     </div>
 
-    <div class="flex justify-between items-center pt-4 border-t border-outline/10 text-[11px] font-label-caps text-on-surface-variant">
-      <div class="flex gap-4">
-        <button @click="toggleSeries('BTC')" class="flex items-center gap-1.5 transition-opacity" :class="selectedSymbol === 'BTC' ? 'opacity-100' : 'opacity-30'">
+    <div class="flex justify-between items-center pt-4 border-t border-outline/10 text-[11px] font-label-caps text-on-surface-variant gap-4">
+      <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-1 pr-4">
+        <button @click="toggleSeries('BTC')" class="flex items-center gap-1.5 transition-opacity shrink-0" :class="selectedSymbol === 'BTC' ? 'opacity-100' : 'opacity-30'">
           <span class="w-2 h-2 rounded-full bg-primary neon-glow-primary"></span>
-          <span>BTC/USD</span>
+          <span class="whitespace-nowrap">BTC/USD</span>
         </button>
-        <button @click="toggleSeries('ETH')" class="flex items-center gap-1.5 transition-opacity" :class="selectedSymbol === 'ETH' ? 'opacity-100' : 'opacity-30'">
+        <button @click="toggleSeries('ETH')" class="flex items-center gap-1.5 transition-opacity shrink-0" :class="selectedSymbol === 'ETH' ? 'opacity-100' : 'opacity-30'">
           <span class="w-2 h-2 rounded-full bg-secondary neon-glow-secondary"></span>
-          <span>ETH/USD</span>
+          <span class="whitespace-nowrap">ETH/USD</span>
         </button>
-        <button @click="toggleSeries('SOL')" class="flex items-center gap-1.5 transition-opacity" :class="selectedSymbol === 'SOL' ? 'opacity-100' : 'opacity-30'">
+        <button @click="toggleSeries('SOL')" class="flex items-center gap-1.5 transition-opacity shrink-0" :class="selectedSymbol === 'SOL' ? 'opacity-100' : 'opacity-30'">
           <span class="w-2 h-2 rounded-full bg-tertiary neon-glow-tertiary"></span>
-          <span>SOL/USD</span>
+          <span class="whitespace-nowrap">SOL/USD</span>
         </button>
-        <button @click="toggleSeries('BNB')" class="flex items-center gap-1.5 transition-opacity" :class="selectedSymbol === 'BNB' ? 'opacity-100' : 'opacity-30'">
+        <button @click="toggleSeries('BNB')" class="flex items-center gap-1.5 transition-opacity shrink-0" :class="selectedSymbol === 'BNB' ? 'opacity-100' : 'opacity-30'">
           <span class="w-2 h-2 rounded-full bg-[#f3ba2f] shadow-[0_0_8px_rgba(243,186,47,0.5)]"></span>
-          <span>BNB/USD</span>
+          <span class="whitespace-nowrap">BNB/USD</span>
         </button>
       </div>
-      <div class="flex items-center gap-2">
+      <div class="hidden sm:flex items-center gap-2 shrink-0">
         <span class="material-symbols-outlined text-[14px]">history</span>
-        <span>NODE: NEXUS_01_WEST</span>
+        <span class="whitespace-nowrap">NODE: NEXUS_01_WEST</span>
       </div>
     </div>
   </div>

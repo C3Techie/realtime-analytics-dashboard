@@ -11,9 +11,18 @@ const navItems = [
 </script>
 
 <template>
+  <!-- Mobile Backdrop -->
+  <div 
+    v-if="uiStore.isSidebarOpen" 
+    class="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] pointer-events-auto"
+    @click.stop="uiStore.isSidebarOpen = false"
+  ></div>
+
   <nav 
-    class="hidden md:flex fixed left-0 top-0 h-full flex-col pt-20 z-40 bg-surface-container-lowest/80 backdrop-blur-2xl border-r border-white/5 transition-all duration-300 overflow-y-auto overflow-x-hidden group"
-    :class="[uiStore.isSidebarOpen ? 'w-60' : 'w-16']"
+    class="fixed left-0 top-0 h-full flex flex-col pt-20 z-[70] bg-surface-container-lowest/95 backdrop-blur-2xl border-r border-white/5 transition-all duration-300 overflow-y-auto overflow-x-hidden group"
+    :class="[
+      uiStore.isSidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full md:w-16 md:translate-x-0 md:flex',
+    ]"
   >
     <div class="px-4 mb-8 flex items-center" :class="uiStore.isSidebarOpen ? 'justify-start' : 'justify-center'">
       <img src="/src/assets/logo.png" alt="Logo" class="w-8 h-8 object-contain">
@@ -29,7 +38,7 @@ const navItems = [
       <button 
         v-for="item in navItems" 
         :key="item.id"
-        @click="uiStore.activeTab = item.id"
+        @click="uiStore.activeTab = item.id; uiStore.isSidebarOpen = false"
         class="flex items-center gap-4 px-4 py-4 hover:bg-white/5 transition-all relative"
         :class="[
           uiStore.activeTab === item.id ? 'text-secondary bg-secondary-container/20 border-r-2 border-secondary' : 'text-on-surface-variant hover:text-on-surface',

@@ -4,7 +4,7 @@ import { useUIStore } from '../../store';
 const uiStore = useUIStore();
 
 const tabs = [
-  { id: 'overview', icon: 'dashboard', label: 'Overview' }
+  { id: 'overview', icon: 'dashboard', label: 'OVERVIEW' }
 ];
 
 const handleTabClick = (tabId: string) => {

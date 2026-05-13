@@ -36,7 +36,7 @@ const getLevelClass = (level: string) => {
       </div>
 
       <!-- Filters -->
-      <div class="flex gap-2">
+      <div class="flex flex-col sm:flex-row gap-2">
         <div class="relative flex-1">
           <span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-[14px] text-outline">search</span>
           <input 

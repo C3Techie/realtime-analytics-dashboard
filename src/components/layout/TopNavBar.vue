@@ -19,7 +19,7 @@ const handleNotImplemented = (moduleName: string) => {
     }">
     
     <div class="flex items-center gap-4">
-      <button class="hidden md:block text-on-surface-variant p-2 rounded-default hover:bg-white/5 active:scale-95 duration-100" @click="uiStore.isSidebarOpen = !uiStore.isSidebarOpen">
+      <button class="text-on-surface-variant p-2 rounded-default hover:bg-white/5 active:scale-95 duration-100" @click="uiStore.isSidebarOpen = !uiStore.isSidebarOpen">
         <span class="material-symbols-outlined">menu</span>
       </button>
       <div class="flex items-center gap-3">

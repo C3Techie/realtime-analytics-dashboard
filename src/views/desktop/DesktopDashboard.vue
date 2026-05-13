@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useBreakpoint } from '../../composables/useBreakpoint';
 import { useUIStore, useStreamingStore } from '../../store';
 import TopNavBar from '../../components/layout/TopNavBar.vue';
 import SideNavBar from '../../components/layout/SideNavBar.vue';
@@ -10,6 +11,7 @@ import ActivityFeed from '../../components/feed/ActivityFeed.vue';
 import ActiveAlerts from '../../components/feed/ActiveAlerts.vue';
 import SystemHealthHeatmap from '../../components/metrics/SystemHealthHeatmap.vue';
 
+const { isMobile } = useBreakpoint();
 const uiStore = useUIStore();
 const streamingStore = useStreamingStore();
 
@@ -37,7 +39,7 @@ const distributionData = computed(() => {
     
     <div 
       class="flex-1 flex flex-col min-w-0 transition-all duration-300"
-      :style="{ marginLeft: uiStore.isSidebarOpen ? '240px' : '64px' }"
+      :style="{ marginLeft: !isMobile ? (uiStore.isSidebarOpen ? '240px' : '64px') : '0' }"
     >
       <TopNavBar />
       

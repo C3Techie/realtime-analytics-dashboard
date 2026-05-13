@@ -44,7 +44,10 @@ const chartOptions = computed(() => {
       splitLine: { show: false },
       axisLabel: {
         color: isDark ? '#8b90a0' : '#475569',
-        fontSize: 10
+        fontSize: 10,
+        hideOverlap: true,
+        interval: 'auto',
+        minInterval: 1000
       }
     },
     yAxis: {
