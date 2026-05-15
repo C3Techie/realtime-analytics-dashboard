@@ -22,17 +22,17 @@ const handleNotImplemented = (moduleName: string) => {
       <button class="text-on-surface-variant p-2 rounded-default hover:bg-white/5 active:scale-95 duration-100" @click="uiStore.isSidebarOpen = !uiStore.isSidebarOpen">
         <span class="material-symbols-outlined">menu</span>
       </button>
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 md:gap-3">
         <img src="/src/assets/logo.png" alt="Logo" class="w-8 h-8 object-contain">
-        <h1 class="font-display-lg text-[18px] md:text-[20px] font-bold tracking-tighter text-primary">C3Tchie Nexus</h1>
+        <h1 class="font-display-lg text-[18px] md:text-[20px] font-bold tracking-tighter text-primary hidden sm:block">C3Tchie Nexus</h1>
       </div>
     </div>
 
     <!-- Center Section: Stream Controls -->
-    <div class="hidden lg:flex items-center gap-6 bg-surface-container-low px-4 py-1.5 rounded-full border border-outline/5">
+    <div class="flex items-center gap-3 md:gap-6 bg-surface-container-low px-3 md:px-4 py-1.5 rounded-full border border-outline/5">
       <div class="flex items-center gap-2">
         <div class="w-2 h-2 rounded-full" :class="streamingStore.status === 'connected' ? 'bg-secondary animate-pulse-glow' : 'bg-error'"></div>
-        <span class="text-[11px] font-label-caps text-on-surface-variant uppercase tracking-widest">{{ streamingStore.status }}</span>
+        <span class="text-[11px] font-label-caps text-on-surface-variant uppercase tracking-widest hidden md:inline">{{ streamingStore.status }}</span>
       </div>
       <div class="h-4 w-px bg-outline/20"></div>
       <div class="flex items-center gap-4">
@@ -41,7 +41,7 @@ const handleNotImplemented = (moduleName: string) => {
           class="flex items-center gap-2 text-[11px] font-label-caps text-on-surface-variant hover:text-primary transition-colors"
         >
           <span class="material-symbols-outlined text-[18px]">{{ streamingStore.status === 'paused' ? 'play_arrow' : 'pause' }}</span>
-          <span>{{ streamingStore.status === 'paused' ? 'RESUME STREAM' : 'PAUSE STREAM' }}</span>
+          <span class="hidden md:inline">{{ streamingStore.status === 'paused' ? 'RESUME STREAM' : 'PAUSE STREAM' }}</span>
         </button>
       </div>
     </div>
@@ -56,15 +56,15 @@ const handleNotImplemented = (moduleName: string) => {
         <span class="material-symbols-outlined">{{ uiStore.isDark ? 'light_mode' : 'dark_mode' }}</span>
       </button>
 
-      <button @click="handleNotImplemented('Sensors')" class="p-2 text-on-surface-variant hover:bg-white/5 transition-colors rounded-default">
+      <button @click="handleNotImplemented('Sensors')" class="p-2 text-on-surface-variant hover:bg-white/5 transition-colors rounded-default hidden md:block">
         <span class="material-symbols-outlined">sensors</span>
       </button>
-      <button @click="handleNotImplemented('Notifications')" class="p-2 text-on-surface-variant hover:bg-white/5 transition-colors rounded-default relative">
+      <button @click="handleNotImplemented('Notifications')" class="p-2 text-on-surface-variant hover:bg-white/5 transition-colors rounded-default relative hidden md:block">
         <span class="material-symbols-outlined">notifications</span>
         <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
       </button>
-      <div @click="handleNotImplemented('Profile Settings')" class="ml-2 pl-4 border-l border-white/10 hidden md:block cursor-pointer hover:opacity-80 transition-opacity">
-        <img alt="Profile" class="w-8 h-8 rounded-default border border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwbNsUtQOAfv2h23MqjCcGMGxY_fKBBbB__zt4oF8XfGqD560f9d7OW6xv0-ws2P3nMnRiifB6MKzzZjqlSgkoL7dn1nvlGkvzMeNqpM3YY4gBmr-VLMqWP-C-RbJX3QZHHAsTuoQfTtwixAHE1Hgqpm1iL55QpY57JkrXAlwGsG_ec8-mfHRxTzPu6fDmj7A9Wbj5XEo6x4vQGXtjlgHTkJ8XZUOXC5JyXpuPNgAIbvSVCUdOrwCSQOyx7ODusDGR-b1JuePr1e4"/>
+      <div @click="handleNotImplemented('Profile Settings')" class="ml-1 md:ml-2 pl-3 md:pl-4 border-l border-white/10 cursor-pointer hover:opacity-80 transition-opacity">
+        <img alt="Profile" class="w-7 h-7 md:w-8 md:h-8 rounded-default border border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwbNsUtQOAfv2h23MqjCcGMGxY_fKBBbB__zt4oF8XfGqD560f9d7OW6xv0-ws2P3nMnRiifB6MKzzZjqlSgkoL7dn1nvlGkvzMeNqpM3YY4gBmr-VLMqWP-C-RbJX3QZHHAsTuoQfTtwixAHE1Hgqpm1iL55QpY57JkrXAlwGsG_ec8-mfHRxTzPu6fDmj7A9Wbj5XEo6x4vQGXtjlgHTkJ8XZUOXC5JyXpuPNgAIbvSVCUdOrwCSQOyx7ODusDGR-b1JuePr1e4"/>
       </div>
     </div>
   </header>

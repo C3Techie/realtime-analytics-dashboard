@@ -156,16 +156,16 @@ export class BinanceStreamService {
 
   private generateFallbackMarketData(timestamp: number) {
     const fallbacks = [
-      { s: 'BTC', v: 64000, c: 1.2 },
-      { s: 'ETH', v: 3400, c: -0.5 },
-      { s: 'SOL', v: 145, c: 4.2 },
-      { s: 'BNB', v: 590, c: 0.8 },
-      { s: 'VOL', v: 1200000000, c: 2.1 }
+      { s: 'BTC', v: 80000, c: 1.2 },
+      { s: 'ETH', v: 2200, c: -0.5 },
+      { s: 'SOL', v: 90, c: 0.3 },
+      { s: 'BNB', v: 670, c: 1.7 },
+      { s: 'VOL', v: 1600000000, c: 2.1 }
     ];
 
     fallbacks.forEach(f => {
       if (this.receivedRealSymbols.has(f.s)) return;
-      
+
       const value = f.v + (Math.random() * (f.v * 0.001) - (f.v * 0.0005));
       this.broadcast({
         type: 'metric',
